@@ -6,9 +6,10 @@ import re
 import title_load
 import date_load
 import text_load
-import saving_as_text,data_store_in_csv
+import saving_as_text,data_store_in_csv,move_text_to_folder
 import initiate_google_drive,text_file_upload,create_folder_google_drive
 import os
+import shutil
 #extracting article text if the url contains any article
 creds=None
 folder_id=None
@@ -18,8 +19,8 @@ def site_test_for_article(page_soup):
     text=text_load.text_read(page_soup)
     saving_as_text.store_as_text(title,text)
     data_store_in_csv.data_write(title,date,my_url)
-    text_file_upload.text_upload(title,creds,folder_id)
-
+    text_file_upload.text_upload(title+'.txt',creds,folder_id)
+    move_text_to_folder.move(title+'.txt')
 
 #input from command line argument
 search=sys.argv[1]
@@ -53,7 +54,7 @@ f1=open('file_id.csv','w')
 f1.write('Title'+','+'File_id'+'\n')
 f1.close()
 
-
+os.mkdir('Results')
 for i in texts:
     #taking a url which has the string saved in variable "search" or the word "coronavirus"
     if(search in str(i).casefold() and "live" not in str(i).casefold()):  
@@ -86,4 +87,8 @@ for i in texts:
                 temp=page_soup.find_all("a")
                 texts.extend(temp)
                 pass
-            
+#uploading csv files to drive and moving to folder results
+text_file_upload.text_upload('final.csv',creds,folder_id)
+text_file_upload.text_upload('file_id.csv',creds,folder_id)
+
+          
